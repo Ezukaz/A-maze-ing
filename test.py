@@ -1,6 +1,6 @@
 import random
 import parse_config
-from maze_generator import MazeManager, NORTH, EAST, SOUTH, WEST, print_maze, solve_maze, print_visual_maze
+from maze_generator import MazeManager, NORTH, EAST, SOUTH, WEST, print_maze
 import sys
 
 
