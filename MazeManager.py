@@ -1,13 +1,12 @@
 import random
-from collections import deque
-from parse_config import MazeConfig
+from MazeConfig import MazeConfig
 
 NORTH = 0b0001  # 1
 EAST = 0b0010  # 2
 SOUTH = 0b0100  # 4
 WEST = 0b1000  # 8
 
-# (dx, dy, current_wall, neighbor_wall, output_letter)
+"""dx, dy, current_wall, neighbor_wall, output_letter"""
 DIRECTION = [
     (0, -1, NORTH, SOUTH, 'N'),  # 北
     (+1, 0, EAST, WEST, 'E'),  # 東
@@ -15,6 +14,7 @@ DIRECTION = [
     (-1, 0, WEST, EAST, 'W')  # 西
 ]
 
+"""42 pattern(7 x 5): True coordinate forbid to break wall"""
 PATTERN_FT = [
     [True,  False, False, False, True,  True,  True],
     [True,  False, False, False, False, False, True],
@@ -30,12 +30,15 @@ class MazeManager:
     def __init__(self, config: MazeConfig) -> None:
         self.width = config.width
         self.height = config.height
-        self.maze = [[0b1111] * self.width for _ in range(self.height)]
-        self.visited = [[False] * self.width for _ in range(self.height)]
         self.entry = config.entry
         self.exit = config.exit
+        self.output_file = config.output_file
+        self.perfect = config.perfect
+        self.maze = [[0b1111] * self.width for _ in range(self.height)]
+        self.visited = [[False] * self.width for _ in range(self.height)]
 
-    def generate(self, x: int, y: int) -> None:
+    @staticmethod
+    def build(self, x: int, y: int) -> None:
         self.visited[y][x] = True
         directions = DIRECTION.copy()
         random.shuffle(directions)
@@ -48,12 +51,14 @@ class MazeManager:
                 else:
                     self.maze[y][x] &= ~cur_wall
                     self.maze[ny][nx] &= ~next_wall
-                    self.generate(nx, ny)
+                    self.build(nx, ny)
         return None
 
-    def ft_logo(self) -> bool:
+    @staticmethod
+    def ft_logo(self) -> None:
         if self.width <= WIDTH_FT or self.height <= HEIGHT_FT:
-            return False
+            print("***too small to make '42' pattern.")
+            return None
 
         ft_x = self.width // 2 - WIDTH_FT // 2
         ft_y = self.height // 2 - HEIGHT_FT // 2
@@ -63,45 +68,43 @@ class MazeManager:
             for fx in range(WIDTH_FT):
                 if PATTERN_FT[fy][fx]:
                     pattern_cells.add((ft_x + fx, ft_y + fy))
-
         if self.entry in pattern_cells or self.exit in pattern_cells:
-            return False
+            # entryまたはexitの座標が被っていたので、被っている座標をランダムに移動、またその旨のメッセージを出力
+            pass
 
         for fy in range(HEIGHT_FT):
             for fx in range(WIDTH_FT):
                 if PATTERN_FT[fy][fx]:
                     self.visited[ft_y + fy][ft_x + fx] = True
 
-        return True
+    def generate(self, seed: int = random.randint()) -> None:
+        random.seed(seed)
+        self.ft_logo()
+        if self.perfect is True:
+            # 完全迷路の作成
+            return None
+        self.build(*self.entry)
+        path = self.find_path()
+        self.print_maze()
 
-    def reset(self) -> None:
-        self.maze = [[0b1111] * self.width for _ in range(self.height)]
-        self.visited = [[False] * self.width for _ in range(self.height)]
+        with open(self.output_file, "w") as f:
+            for y in range(self.height):
+                row = ""
+                for x in range(self.width):
+                    row += hex(self.maze[y][x]).strip("0x").upper()
+                f.write(row)
+            f.write("\n")
+            f.write(self.entry)
+            f.write(self.exit)
+            f.write(path)
 
-    def create(self) -> None:
-        self.reset()
-        if not self.ft_logo():
-            print("cannot make 42 logo.")
-        self.generate(*self.entry)
-
-    def hex_maze(self) -> None:
-        for y in range(self.height):
-            row = ""
-            for x in range(self.width):
-                row += hex(self.maze[y][x]).strip("0x").upper()
-            print(row)
-
-    def find_path(
-        self,
-        start: tuple[int, int],
-        goal: tuple[int, int]
-            ) -> str:
-        queue = deque()
-        queue.append((start, ""))
-        visited = {start}
+    def find_path(self) -> str:
+        queue = []
+        queue.append((self.entry, ""))
+        visited = {self.entry}
         while queue:
-            (x, y), path = queue.popleft()
-            if (x, y) == goal:
+            (x, y), path = queue.pop(0)
+            if (x, y) == self.exit:
                 return path
             for dx, dy, wall_bit, _, letter in DIRECTION:
                 if self.maze[y][x] & wall_bit:
@@ -114,14 +117,10 @@ class MazeManager:
                     queue.append(((nx, ny), path + letter))
         return None
 
-    def print_maze(
-        self,
-        path: str = None,
-        start: tuple[int, int] = None
-    ) -> None:
+    def print_maze(self, path: str = None) -> None:
         path_cells = set()
-        if path and start:
-            x, y = start
+        if path and self.entry:
+            x, y = self.entry
             path_cells.add((x, y))
             for ch in path:
                 for dx, dy, _, _, letter in DIRECTION:
