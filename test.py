@@ -26,7 +26,8 @@ if __name__ == "__main__":
         print("1. Re-gnerate a new maze")
         print("2. Show/Hide path form entry to exit")
         print("3. Rotate maze colors")
-        print("4. Quit")
+        print("4. Remake seed map")
+        print("5. Quit")
         try:
             option = int(input("Choice? (1 - 4): "))
             match option:
@@ -44,15 +45,15 @@ if __name__ == "__main__":
                     # rotate colors
                     pass
                 case 4:
-                    sys.exit(0)
-                case 5:
                     seed_inp = int(input(
                         "Please input seed or 0 for random: "
                     ))
                     seed = (
                         random.randint(1, 99999) if seed_inp == 0 else seed_inp
                     )
-                    gen, path = regenerate(config, config.seed)
+                    gen, path = regenerate(config, seed)
+                case 5:
+                    sys.exit(0)
                 case _:
                     print("please enter option.(1 - 5)")
         except ValueError:
