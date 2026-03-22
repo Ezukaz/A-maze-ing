@@ -1,13 +1,11 @@
 from pydantic import BaseModel, Field, model_validator
-from typing import Annotated, Optional
+from typing import Optional
 import sys
 
 
 class MazeConfig(BaseModel):
-    width: Annotated[int,
-                     Field(gt=0, description="Maze width (number of cells)")]
-    height: Annotated[int,
-                      Field(gt=0, description="Maze height (number of cells)")]
+    width: int = Field(gt=0, description="Maze width (number of cells)")
+    height: int = Field(gt=0, description="Maze height (number of cells)")
     entry: tuple[int, int]
     exit: tuple[int, int]
     output_file: str

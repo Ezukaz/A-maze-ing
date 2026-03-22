@@ -1,6 +1,6 @@
 import random
 import parse_config
-from maze_generator import MazeManager, NORTH, EAST, SOUTH, WEST, print_maze
+from try_this import MazeManager
 import sys
 
 
@@ -12,7 +12,7 @@ if __name__ == "__main__":
     random.seed(config.seed)
     gen = MazeManager(config)
     gen.create(config.entry[0], config.entry[1])
-    print_maze(gen.maze, gen.width, gen.height)
+    gen.hex_maze()
     while True:
         print("\n=== A-Maze-ing ===")
         print("1. Re-gnerate a new maze")
@@ -23,7 +23,7 @@ if __name__ == "__main__":
             option = int(input("Choice? (1 - 4): "))
             match option:
                 case 1:
-                    # regenerate a new maze
+                    gen.create(config.entry[0], config.entry[1])
                     pass
                 case 2:
                     # show hide
