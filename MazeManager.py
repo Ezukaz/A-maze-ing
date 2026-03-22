@@ -14,7 +14,7 @@ DIRECTION = [
     (-1, 0, WEST, EAST, 'W')  # 西
 ]
 
-"""42 pattern(7 x 5): True coordinate forbid to break wall"""
+"""42 pattern(7 x 5): True coordinate forbid to break walls"""
 PATTERN_FT = [
     [True,  False, False, False, True,  True,  True],
     [True,  False, False, False, False, False, True],

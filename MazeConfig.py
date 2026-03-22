@@ -1,9 +1,7 @@
 from pydantic import BaseModel, Field, model_validator, field_validator
 import sys
 
-"""
-validate and parse config.txt
-"""
+"""validate and parse config.txt"""
 
 
 class MazeConfig(BaseModel):
