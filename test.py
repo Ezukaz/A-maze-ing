@@ -1,6 +1,6 @@
 import random
 import parse_config
-from maze_generator import MazeManager, NORTH, EAST, SOUTH, WEST, print_maze
+from maze_generator import MazeManager, NORTH, EAST, SOUTH, WEST, print_maze, solve_maze, print_visual_maze
 import sys
 
 
@@ -13,3 +13,7 @@ if __name__ == "__main__":
     gen = MazeManager(config)
     gen.generate(config.entry[0], config.entry[1])
     print_maze(gen.maze, gen.width, gen.height)
+
+    path = solve_maze(gen.maze, config.width, config.height, config.entry, config.exit)
+    print(path)
+    print_visual_maze(gen.maze, config.width, config.height, path, config.entry)
