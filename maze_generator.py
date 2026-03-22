@@ -1,26 +1,25 @@
 import random
-from collections import deque
 from parse_config import MazeConfig
 from typing import Optional
 
-NORTH = 0b0001 # 1
-EAST = 0b0010 # 2
-SOUTH = 0b0100 # 4
-WEST = 0b1000 # 8
+NORTH = 0b0001  # 1
+EAST = 0b0010  # 2
+SOUTH = 0b0100  # 4
+WEST = 0b1000  # 8
 
 # (dx, dy, current_wall, neighbor_wall, output_letter)
 DIRECTION = [
-    ( 0, -1, NORTH, SOUTH, 'N'), # 北
-    (+1, 0, EAST, WEST, 'E'), # 東
-    ( 0, +1, SOUTH, NORTH, 'S'), # 南
-    (-1, 0, WEST, EAST, 'W') # 西
+    (0, -1, NORTH, SOUTH, 'N'),  # 北
+    (+1, 0, EAST, WEST, 'E'),  # 東
+    (0, +1, SOUTH, NORTH, 'S'),  # 南
+    (-1, 0, WEST, EAST, 'W')  # 西
 ]
 
 FT_PATTERN = [
     [True, False, False, False,  True, True, True],
     [True, False, False, False, False, False, True],
-
 ]
+
 
 class MazeManager:
     def __init__(self, config: MazeConfig) -> None:
@@ -30,6 +29,7 @@ class MazeManager:
         self.visited = [[False] * self.width for _ in range(self.height)]
         self.entry = config.entry
         self.exit = config.exit
+        self.history = []
 
     def generate(self, x: int, y: int) -> Optional[list[list[int]]]:
         visited = self.visited.copy()
@@ -48,9 +48,9 @@ class MazeManager:
                     maze[ny][nx] &= ~next_wall
                     self.generate(nx, ny)
         return maze
-    
+
     def create(self) -> Optional[list[list[int]]]:
-        self.generate(*self.entry)
+        self.history = self.generate(*self.entry)
 
 
 def print_maze(maze: list[list[int]], width: int, height: int) -> None:

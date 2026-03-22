@@ -1,18 +1,17 @@
 import random
-from collections import deque
 from parse_config import MazeConfig
 
 NORTH = 0b0001  # 1
-EAST  = 0b0010  # 2
+EAST = 0b0010  # 2
 SOUTH = 0b0100  # 4
-WEST  = 0b1000  # 8
+WEST = 0b1000  # 8
 
 # (dx, dy, current_wall, neighbor_wall, output_letter)
 DIRECTION = [
-    ( 0, -1, NORTH, SOUTH, 'N'), # 北
-    (+1, 0, EAST, WEST, 'E'), # 東
-    ( 0, +1, SOUTH, NORTH, 'S'), # 南
-    (-1, 0, WEST, EAST, 'W') # 西
+    (0, -1, NORTH, SOUTH, 'N'),  # 北
+    (+1, 0, EAST, WEST, 'E'),  # 東
+    (0, +1, SOUTH, NORTH, 'S'),  # 南
+    (-1, 0, WEST, EAST, 'W')  # 西
 ]
 
 
@@ -49,26 +48,28 @@ def print_maze(maze: list[list[int]], width: int, height: int) -> None:
 
 
 def solve_maze(
+        self,
         maze: list[list[int]],
         width: int, height: int,
         start: tuple[int, int],
         goal: tuple[int, int]
-    ) -> str:
-    queue = deque()
+        ) -> str:
+    queue = []
     queue.append((start, ""))
-    visited = {start}
+    visited = self.visited.copy()
 
     while queue:
-        (x, y), path = queue.popleft()
+        (x, y), path = queue.pop(0)
         if (x, y) == goal:
             return path
-        cell_walls = maze[y][x]
+        current_cell = maze[y][x]
         for dx, dy, wall_bit, _, letter in DIRECTION:
-            if cell_walls & wall_bit:
+            if current_cell & wall_bit:
                 continue
             nx, ny = x + dx, y + dy
-            if 0 <= nx < width and 0 <= ny < height and (nx, ny) not in visited:
-                visited.add((nx, ny))
+            if (0 <= nx < width and 0 <= ny < height
+                    and visited[ny][nx] is False):
+                visited[ny][nx] = True
                 queue.append(((nx, ny), path + letter))
     return None
 
@@ -78,7 +79,7 @@ def print_visual_maze(
         width: int, height: int,
         path: str = None,
         start: tuple[int, int] = None
-    ) -> None:
+        ) -> None:
     path_cells = set()
     if path and start:
         x, y = start

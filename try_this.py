@@ -3,17 +3,17 @@ from collections import deque
 from parse_config import MazeConfig
 
 
-NORTH = 0b0001 # 1
-EAST = 0b0010 # 2
-SOUTH = 0b0100 # 4
-WEST = 0b1000 # 8
+NORTH = 0b0001  # 1
+EAST = 0b0010  # 2
+SOUTH = 0b0100  # 4
+WEST = 0b1000  # 8
 
 # (dx, dy, current_wall, neighbor_wall, output_letter)
 DIRECTION = [
-    ( 0, -1, NORTH, SOUTH, 'N'), # 北
-    (+1, 0, EAST, WEST, 'E'), # 東
-    ( 0, +1, SOUTH, NORTH, 'S'), # 西
-    (-1, 0, WEST, EAST, 'W') # 西
+    (0, -1, NORTH, SOUTH, 'N'),  # 北
+    (+1, 0, EAST, WEST, 'E'),  # 東
+    (0, +1, SOUTH, NORTH, 'S'),  # 西
+    (-1, 0, WEST, EAST, 'W')  # 西
 ]
 
 
