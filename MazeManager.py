@@ -23,7 +23,6 @@ COLORS = [
 ]
 
 
-
 LETTER_TO_DIR = {
     'N': (0, -1),
     'E': (1,  0),
@@ -122,16 +121,15 @@ class MazeManager:
         """seed"""
         if seed is None:
             seed = random.randint(0, 2**32 - 1)
+            random.seed(seed)
         else:
             try:
                 random.seed(self.seed_history[seed - 1])
             except IndexError:
                 print("enter a option for making seed or nothing",
                       file=sys.stderr)
-
         """42 pattern"""
         self.ft_logo()
-
         """make maze"""
         self.make_maze(*self.entry)
         if self.perfect is False:
@@ -278,4 +276,9 @@ class MazeManager:
         for row in draw:
             print("".join(row))
 
-    # def rotate_color(self) -> None:
+    def rotate_color(self) -> None:
+        idx = COLORS.index(self.wall_color)
+        if COLORS[idx] == COLORS[-1]:
+            self.wall_color = COLORS[0]
+        else:
+            self.wall_color = COLORS[idx + 1]
