@@ -66,8 +66,8 @@ class MazeManager:
         self.perfect = config.perfect
         self.maze = [[0b1111] * self.width for _ in range(self.height)]
         self.visited = [[False] * self.width for _ in range(self.height)]
-        self.ft_cells = set()
-        self.seed_history = []
+        self.ft_cells: set[tuple[int, int]] = set()
+        self.seed_history: list[int] = []
         self.wall_color = WALL
 
     def reset(self) -> None:
@@ -179,7 +179,7 @@ class MazeManager:
 
     def find_path(self) -> str | None:
         """BFS, using queue"""
-        queue = deque()
+        queue: deque[tuple[tuple[int, int], str]] = deque()
         queue.append((self.entry, ""))
         visited = {self.entry}
         while queue:
