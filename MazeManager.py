@@ -97,8 +97,8 @@ class MazeManager:
             return None
 
         """determine the coordinates of 42 pattern in this size"""
-        ft_x = self.width // 2 - WIDTH_FT // 2
-        ft_y = self.height // 2 - HEIGHT_FT // 2
+        ft_x = round(self.width / 2) - WIDTH_FT // 2 - 1
+        ft_y = round(self.height / 2) - HEIGHT_FT // 2 - 1
         pattern_cells = set()
         for fy in range(HEIGHT_FT):
             for fx in range(WIDTH_FT):
@@ -278,5 +278,4 @@ class MazeManager:
         for row in draw:
             print("".join(row))
 
-    def rotate_color(self) -> None:
-        
+    # def rotate_color(self) -> None:
