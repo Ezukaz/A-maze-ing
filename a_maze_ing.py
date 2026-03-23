@@ -32,6 +32,7 @@ if __name__ == "__main__":
                             seed = int(seed)
                         path = gen.generate(seed)
                         gen.print_maze()
+                        hide = False
                     except ValueError:
                         print("cannot regenerate a new maze.\n"
                               "enter integer seed or nothing.\n")
