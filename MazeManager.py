@@ -3,10 +3,39 @@ import sys
 from collections import deque
 from MazeConfig import MazeConfig
 
-NORTH = 0b0001  # 1
-EAST = 0b0010  # 2
-SOUTH = 0b0100  # 4
-WEST = 0b1000  # 8
+"""visualize constants"""
+RESET = "\033[0m"
+WALL = "\033[47m"  # white
+PATH = "\033[44m"  # blue
+ENTRY = "\033[42m"  # green
+EXIT = "\033[41m"  # red
+FT = "\033[46m"  # light blue
+SPACE = "  "
+BLOCK = "  "
+
+COLORS = [
+    "\033[47m",  # white
+    "\033[43m",  # yellow
+    "\033[42m",  # green
+    "\033[41m",  # red
+    "\033[44m",  # blue
+    "\033[45m",  # purple
+]
+
+
+
+LETTER_TO_DIR = {
+    'N': (0, -1),
+    'E': (1,  0),
+    'S': (0,  1),
+    'W': (-1, 0)
+}
+
+"""maze constants"""
+NORTH = 0b0001
+EAST = 0b0010
+SOUTH = 0b0100
+WEST = 0b1000
 
 """dx, dy, current_wall, neighbor_wall, output_letter"""
 DIRECTION = [
@@ -40,6 +69,12 @@ class MazeManager:
         self.visited = [[False] * self.width for _ in range(self.height)]
         self.ft_cells = set()
         self.seed_history = []
+        self.wall_color = WALL
+
+    def reset(self) -> None:
+        self.maze = [[0b1111] * self.width for _ in range(self.height)]
+        self.visited = [[False] * self.width for _ in range(self.height)]
+        self.ft_cells = set()
 
     def make_maze(self, x: int, y: int) -> None:
         self.visited[y][x] = True
@@ -71,23 +106,28 @@ class MazeManager:
                     pattern_cells.add((ft_x + fx, ft_y + fy))
 
         """validate the entry/exit coordinates overlap"""
-        if self.entry in pattern_cells:
-            # entry, exitの座標に被らないように42ロゴの座標を移動
-            ...
-        elif self.exit in pattern_cells:
-            # entry, exitの座標に被らないように42ロゴの座標を移動
-            ...
+        if self.entry in pattern_cells or self.exit in pattern_cells:
+            print("***'42' pattern overlaps with entry/exit. "
+                  "Skipping pattern.")
+            return None
 
         for fy in range(HEIGHT_FT):
             for fx in range(WIDTH_FT):
                 if PATTERN_FT[fy][fx]:
                     self.visited[ft_y + fy][ft_x + fx] = True
+                    self.ft_cells.add((ft_x + fx, ft_y + fy))
 
-    def generate(self, seed: int | None = None) -> None:
+    def generate(self, seed: int | None = None) -> str | None:
+        self.reset()
         """seed"""
         if seed is None:
             seed = random.randint(0, 2**32 - 1)
-        random.seed(seed)
+        else:
+            try:
+                random.seed(self.seed_history[seed - 1])
+            except IndexError:
+                print("enter a option for making seed or nothing",
+                      file=sys.stderr)
 
         """42 pattern"""
         self.ft_logo()
@@ -95,12 +135,13 @@ class MazeManager:
         """make maze"""
         self.make_maze(*self.entry)
         if self.perfect is False:
+            """make maze as imperfect maze"""
             breakable = []
             for y in range(1, self.height - 1):
                 for x in range(1, self.width - 1):
                     """validate (x, y) is 42 logo
                         (only these blocks are 0b1111)"""
-                    if self.maze[y][x] != 0b1111:
+                    if (x, y) not in self.ft_cells:
                         breakable.append((x, y))
             for _ in range(random.randint(1, self.width*self.height // 10)):
                 x, y = random.choice(breakable)
@@ -112,8 +153,8 @@ class MazeManager:
                         self.maze[y][x] &= ~cur_wall
                         self.maze[ny][nx] &= ~next_wall
                         break
-            # make maze as imperfect maze
-            pass
+
+        self.seed_history.append(seed)
 
         """find the shortest path"""
         path = self.find_path()
@@ -121,23 +162,22 @@ class MazeManager:
             print("Error: no path found.", file=sys.stderr)
             return None
 
-        self.seed_history.append(seed)
-
         """write output file"""
         try:
             with open(self.output_file, "w") as f:
                 for y in range(self.height):
                     row = ""
                     for x in range(self.width):
-                        row += f"{self.maze[y][x]: X}"
+                        row += f"{self.maze[y][x]:X}"
                     f.write(row + "\n")
                 f.write("\n")
-                f.write(str(self.entry))
-                f.write(str(self.exit))
+                f.write(str(self.entry) + "\n")
+                f.write(str(self.exit) + "\n")
                 f.write(path + "\n")
         except Exception as e:
             print("\nError occured while writing in output file.\n"
                   f"Detail: {e}\n", file=sys.stderr)
+        return path
 
     def find_path(self) -> str | None:
         """BFS, using queue"""
@@ -158,41 +198,85 @@ class MazeManager:
                 if (0 <= nx < self.width
                         and 0 <= ny < self.height
                         and (nx, ny) not in visited):
-                    visited[ny][nx] = True
+                    visited.add((nx, ny))
                     queue.append(((nx, ny), path + letter))
         """if failure: """
         return None
 
-    def print_maze(self, path: str = None) -> None:
+    @staticmethod
+    def _get_path_cells(
+            path: str,
+            entry: tuple[int, int]
+    ) -> set[tuple[int, int]]:
         path_cells = set()
-        if path and self.entry:
-            x, y = self.entry
+        x, y = entry
+        for letter in path:
+            dx, dy = LETTER_TO_DIR[letter]
+            x, y = x + dx, y + dy
             path_cells.add((x, y))
-            for ch in path:
-                for dx, dy, _, _, letter in DIRECTION:
-                    if ch == letter:
-                        x, y = x + dx, y + dy
-                        path_cells.add((x, y))
-                        break
+        return path_cells
+
+    @staticmethod
+    def _get_cell_color(
+            x: int,
+            y: int,
+            entry: tuple[int, int],
+            exit: tuple[int, int],
+            ft_cells: set[tuple[int, int]],
+            path_cells: set[tuple[int, int]]
+    ) -> str:
+        if (x, y) == entry:
+            return ENTRY
+        if (x, y) == exit:
+            return EXIT
+        if (x, y) in ft_cells:
+            return FT
+        if (x, y) in path_cells:
+            return PATH
+        return ""
+
+    def print_maze(
+            self,
+            path: str | None = None,
+    ) -> None:
+        w = self.width * 2 + 1
+        h = self.height * 2 + 1
+
+        # 描画グリッドを壁で初期化
+        draw = [[self.wall_color + BLOCK + RESET] * w for _ in range(h)]
+
+        # 通路・セルの色を設定
+        path_cells = self._get_path_cells(path, self.entry) if path else set()
 
         for y in range(self.height):
-            top = ""
             for x in range(self.width):
-                top += "+"
-                top += "--" if self.maze[y][x] & NORTH else "  "
-            top += "+"
-            print(top)
+                cx = x * 2 + 1  # セルの描画座標
+                cy = y * 2 + 1
 
-            mid = ""
-            for x in range(self.width):
-                mid += "|" if self.maze[y][x] & WEST else " "
-                mid += "**" if (x, y) in path_cells else "  "
-            mid += "|" if self.maze[y][self.width - 1] & EAST else " "
-            print(mid)
+                # セルの中身
+                cell_color = self._get_cell_color(
+                    x, y, self.entry, self.exit, self.ft_cells, path_cells)
+                draw[cy][cx] = cell_color + BLOCK + RESET
 
-        bottom = ""
-        for x in range(self.width):
-            bottom += "+"
-            bottom += "--" if self.maze[self.height - 1][x] & SOUTH else "  "
-        bottom += "+"
-        print(bottom)
+                # 北壁がなければ通路に
+                if not (self.maze[y][x] & NORTH):
+                    draw[cy - 1][cx] = RESET + BLOCK
+
+                # 南壁がなければ通路に
+                if not (self.maze[y][x] & SOUTH):
+                    draw[cy + 1][cx] = RESET + BLOCK
+
+                # 西壁がなければ通路に
+                if not (self.maze[y][x] & WEST):
+                    draw[cy][cx - 1] = RESET + BLOCK
+
+                # 東壁がなければ通路に
+                if not (self.maze[y][x] & EAST):
+                    draw[cy][cx + 1] = RESET + BLOCK
+
+        # 描画
+        for row in draw:
+            print("".join(row))
+
+    def rotate_color(self) -> None:
+        
