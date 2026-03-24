@@ -5,14 +5,9 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "mazegen"
 version = "1.0.0"
-description = "Maze generator"
 requires-python = ">=3.10"
-authors = [
-    {name = "heychong"},
-    {name = "katakaha"}
-]
+description = "Maze generator"
 readme = "README.md"
-license = "MIT"
 
 [tool.setuptools.packages.find]
 where = ["."]

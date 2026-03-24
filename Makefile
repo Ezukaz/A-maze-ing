@@ -4,7 +4,7 @@ debugger = pdb
 package = pydantic mypy
 config = config.txt
 cache_dir = __pycache__ .mypy_cache mazegen.egg-info
-output_file = := $(shell grep '^OUTPUT_FILE=' config.txt | cut -d '=' -f2)
+output_file := $(shell grep '^OUTPUT_FILE=' config.txt | cut -d '=' -f2)
 mypy_flags =	--warn-return-any \
 				--warn-unused-ignores \
 				--ignore-missing-imports \

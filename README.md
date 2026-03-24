@@ -105,6 +105,9 @@ NESWWSEN...                # 最短経路
 - [PEP 257 Docstrings](https://peps.python.org/pep-0257/)
 - [About Git Rebasing](https://docs.github.com/ja/enterprise-server@3.16/get-started/using-git/about-git-rebase)
 - [3.6 Git のブランチ機能 - リベース](https://git-scm.com/book/ja/v2/Git-%E3%81%AE%E3%83%96%E3%83%A9%E3%83%B3%E3%83%81%E6%A9%9F%E8%83%BD-%E3%83%AA%E3%83%99%E3%83%BC%E3%82%B9)
+- [.tomlファイルとは？](https://zenn.dev/manase/scraps/7cbf66961c94d8)
+- [What Is Python's __init__.py For?](https://realpython.com/python-init-py/)
+- [Pydantic入門 – Pythonでシンプルかつ強力なバリデーションを始めよう](https://qiita.com/Tadataka_Takahashi/items/8b28f49d67d7e1d65d11)
 
 ### AI利用内容
 

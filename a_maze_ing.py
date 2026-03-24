@@ -1,5 +1,5 @@
-from MazeConfig import parse_config
-from MazeManager import MazeManager
+from mazegen import parse_config
+from mazegen import MazeManager
 import sys
 
 if __name__ == "__main__":

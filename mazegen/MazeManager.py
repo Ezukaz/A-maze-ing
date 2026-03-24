@@ -1,7 +1,7 @@
 import random
 import sys
 from collections import deque
-from MazeConfig import MazeConfig
+from mazegen import MazeConfig
 
 """visualize constants"""
 RESET = "\033[0m"
