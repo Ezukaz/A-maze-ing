@@ -1,4 +1,4 @@
-from mazegen import parse_config
+from mazegen.MazeConfig import parse_config
 from mazegen import MazeManager
 import sys
 

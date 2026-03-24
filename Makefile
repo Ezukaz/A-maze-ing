@@ -3,7 +3,7 @@ program = a_maze_ing.py
 debugger = pdb
 package = pydantic mypy
 config = config.txt
-cache_dir = __pycache__ .mypy_cache mazegen.egg-info
+cache_dir = **/__pycache__ .mypy_cache mazegen.egg-info mazegen-1.0.0
 output_file := $(shell grep '^OUTPUT_FILE=' config.txt | cut -d '=' -f2)
 mypy_flags =	--warn-return-any \
 				--warn-unused-ignores \
